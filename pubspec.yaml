@@ -37,13 +37,16 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^8.0.0
   flutter_hooks: ^0.18.1
+  flutter_slidable: ^1.1.0
   freezed_annotation: ^1.0.0
   get_it: ^7.2.0
   google_sign_in: ^5.2.1
+  implicitly_animated_reorderable_list: ^0.4.2
   injectable: ^1.5.0
   json_annotation: ^4.3.0
   kt_dart: ^0.10.0
-  rxdart: ^0.27.2
+  provider: ^6.0.1
+  rxdart: ^0.27.3
   uuid: ^3.0.5
 
 dev_dependencies:

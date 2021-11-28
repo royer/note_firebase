@@ -19,8 +19,8 @@ class NoteFormBloc extends Bloc<NoteFormEvent, NoteFormState> {
   final INoteRepository _noteRepository;
 
   NoteFormBloc(this._noteRepository) : super(NoteFormState.initial()) {
-    on<NoteFormEvent>((event, emit) {
-      event.map(
+    on<NoteFormEvent>((event, emit) async {
+      await event.map(
         initialized: (event) => onInitialized(event, emit),
         bodyChanged: (event) => onNoteBodyChanged(event, emit),
         colorChanged: (event) => onColorChanged(event, emit),
@@ -29,7 +29,8 @@ class NoteFormBloc extends Bloc<NoteFormEvent, NoteFormState> {
       );
     });
   }
-  void onInitialized(_Initialized event, Emitter<NoteFormState> emit) async {
+  Future<void> onInitialized(
+      _Initialized event, Emitter<NoteFormState> emit) async {
     emit(
       event.initNoteOption.fold(
         () => state,
@@ -41,7 +42,8 @@ class NoteFormBloc extends Bloc<NoteFormEvent, NoteFormState> {
     );
   }
 
-  void onNoteBodyChanged(_BodyChanged event, Emitter<NoteFormState> emit) {
+  Future<void> onNoteBodyChanged(
+      _BodyChanged event, Emitter<NoteFormState> emit) async {
     emit(
       state.copyWith(
         note: state.note.copyWith(body: NoteBody(event.bodyStr)),
@@ -50,7 +52,8 @@ class NoteFormBloc extends Bloc<NoteFormEvent, NoteFormState> {
     );
   }
 
-  void onColorChanged(_ColorChanged event, Emitter<NoteFormState> emit) {
+  Future<void> onColorChanged(
+      _ColorChanged event, Emitter<NoteFormState> emit) async {
     emit(
       state.copyWith(
         note: state.note.copyWith(color: NoteColor(event.color)),
@@ -59,7 +62,8 @@ class NoteFormBloc extends Bloc<NoteFormEvent, NoteFormState> {
     );
   }
 
-  void onTodosChanged(_TodosChanged event, Emitter<NoteFormState> emit) {
+  Future<void> onTodosChanged(
+      _TodosChanged event, Emitter<NoteFormState> emit) async {
     emit(
       state.copyWith(
         note: state.note.copyWith(
@@ -71,7 +75,7 @@ class NoteFormBloc extends Bloc<NoteFormEvent, NoteFormState> {
     );
   }
 
-  void onSaved(_Saved event, Emitter<NoteFormState> emit) async {
+  Future<void> onSaved(_Saved event, Emitter<NoteFormState> emit) async {
     Either<NoteFailure, Unit>? failureOrSuccess;
 
     emit(state.copyWith(
@@ -80,9 +84,11 @@ class NoteFormBloc extends Bloc<NoteFormEvent, NoteFormState> {
     ));
 
     if (state.note.failureOption.isNone()) {
-      failureOrSuccess = state.isEditing
-          ? await _noteRepository.update(state.note)
-          : await _noteRepository.create(state.note);
+      if (state.isEditing) {
+        failureOrSuccess = await _noteRepository.update(state.note);
+      } else {
+        failureOrSuccess = await _noteRepository.create(state.note);
+      }
     }
 
     emit(state.copyWith(
